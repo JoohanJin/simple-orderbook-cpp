@@ -1,3 +1,5 @@
+#include <format>
+
 #include "Order.h"
 
 Order::Order(OrderType orderType, OrderId orderId, Side side, Price price, Quantity quantity)
@@ -9,13 +11,35 @@ Order::Order(OrderType orderType, OrderId orderId, Side side, Price price, Quant
     , remainingQuantity_{quantity}
 {}
 
+Order::Order(OrderId orderId, Side side, Quantity quantity)
+    : Order::Order(OrderType::Market, orderId, side, Constants::InvalidPrice, quantity)
+{}
+
 void Order::Fill(Quantity quantity){
     /*
-        * The lowest quantity between both orders is the quantity used to fill the order.
-        */
+    * Fill the quantity of Order with the given quantity
+    */
+    // The lowest quantity between both orders is the quantity used to fill the order.
+    // i.e., float quantityToBeFilled = std::min(quantityToSell, quantityToBuy);
     if (quantity > GetRemainingQuantity()){
-        throw std::logic_error("Order (" + std::to_string(GetOrderId()) + ") cannot be filled for more than its remaining quantity.");
+        throw std::logic_error(std::format(
+            "Order ({}) cannot be filled for more than its remaining quantity.", GetOrderId()
+        ));
     }
 
     remainingQuantity_ -= quantity;
+}
+
+void Order::ToGoodTillCancel(Price price){
+    /*
+     * change the type of order to GTC (why?)
+     * Market to GTC
+     */
+    if (GetOrderType() != OrderType::Market)
+        throw std::logic_error(std::format(
+            "Order ({}) cannot have have its price adjusted, only market orders can.", GetOrderId()
+        ));
+
+    price_ = price;
+    orderType_ = OrderType::GoodTillCancel;
 }

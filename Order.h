@@ -11,6 +11,8 @@ class Order {
 public:
     Order(OrderType orderType, OrderId orderId, Side side, Price price, Quantity quantity);
 
+    Order(OrderId orderId, Side side, Quantity quantity);
+
     OrderId GetOrderId() const { return orderId_; }
     OrderType GetOrderType() const { return orderType_; }
     Side GetSide() const { return side_; }
@@ -21,6 +23,7 @@ public:
 
     void Fill(Quantity quantity);
     bool isFilled() const { return GetRemainingQuantity() == 0; }
+    void ToGoodTillCancel(Price price);
 
 private:
     OrderId orderId_;
